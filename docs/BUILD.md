@@ -45,10 +45,15 @@ export PATH="$HOME/.cargo/bin:$PATH"
 
 ## 2. 安装项目依赖
 
+先进入项目根目录（包含 `package.json` 的目录），再安装：
+
 ```bash
-cd /Users/nathan/Documents/AI区/本地项目管理
+cd project-desk        # 换成你 clone / 存放项目时用的目录名
 npm install
 ```
+
+> 本文的路径都相对项目根目录书写，例如 `bash tools/build/build.sh`、
+> `build/app/项目台.app`，不要写成绝对路径。
 
 产物：`node_modules/`（约 116 MB，已 gitignore）。
 
@@ -103,6 +108,9 @@ src-tauri/target/release/bundle/macos/项目台.app
 | Tauri 原始输出 | `src-tauri/target/release/bundle/macos/项目台.app` |
 
 ### 安装到「应用程序」
+
+把 `build/app/项目台.app` 拖进 Finder 的「应用程序」即可。命令行等价写法
+（`/Applications` 是 macOS 系统目录，必须写绝对路径）：
 
 ```bash
 cp -R build/app/项目台.app /Applications/
@@ -237,8 +245,8 @@ App 的运行数据（数据库、运行日志）**不在这个工作区**，而
 ## 9. 换一台机器重建
 
 ```bash
-git clone <仓库地址>            # 或直接拷贝整个工作区（不含 build/ 与 node_modules/）
-cd 本地项目管理
+git clone https://github.com/ooghoo/project-desk.git   # 也可直接拷贝整个工作区（不含 build/ 与 node_modules/）
+cd project-desk
 npm install
 bash tools/build/build.sh
 ```
