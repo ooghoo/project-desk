@@ -1,0 +1,20 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+src-tauri/target
+src-tauri/gen
+src-tauri/icons/icon.iconset
+.vite
+.tmp
+.probe
+
+# 构建产物：安装包与日志（保留目录结构，内容不入库）
+build/app/*
+build/logs/*
+!build/app/.gitkeep
+!build/logs/.gitkeep
+
+# 本地项目数据与助手记忆（不入库）
+.workbuddy/

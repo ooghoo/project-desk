@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>项目台 · 静态页面示例</title>
+    <style>
+      :root { color-scheme: light dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: -apple-system, "PingFang SC", system-ui, sans-serif;
+        background: #f5f5f7;
+        color: #1d1d1f;
+      }
+      main {
+        max-width: 460px;
+        padding: 40px;
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        text-align: center;
+      }
+      h1 { font-size: 20px; margin: 0 0 8px; letter-spacing: -0.01em; }
+      p { font-size: 13px; line-height: 1.7; color: #6e6e73; margin: 0; }
+      code { font-family: "SF Mono", ui-monospace, monospace; font-size: 12px; }
+      @media (prefers-color-scheme: dark) {
+        body { background: #1c1c1e; color: #f5f5f7; }
+        main { background: #262628; border-color: rgba(255, 255, 255, 0.1); }
+        p { color: #a1a1a6; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>静态页面可以直接用浏览器打开</h1>
+      <p>
+        这个目录被添加到项目台后，默认运行方式是「静态 HTML」，点击运行会调用系统默认浏览器。<br />
+        如果页面依赖 <code>fetch</code> 或模块加载，请在运行配置里改成「本地 Web 服务」，指定
+        <code>npm run dev</code> 或 <code>python -m http.server</code>。
+      </p>
+    </main>
+  </body>
+</html>

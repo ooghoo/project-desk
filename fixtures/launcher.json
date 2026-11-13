@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0.0",
+  "project": {
+    "name": "项目名称",
+    "type": "web"
+  },
+  "defaultConfig": "dev",
+  "configurations": [
+    {
+      "id": "dev",
+      "name": "运行项目",
+      "type": "service",
+      "runtime": "command",
+      "workingDirectory": ".",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "url": null,
+      "startupTimeout": 30,
+      "stopStrategy": "process_tree"
+    }
+  ]
+}
