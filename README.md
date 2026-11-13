@@ -2,10 +2,70 @@
 
 > **中文名**：项目台　|　**英文标识 / 仓库名**：`project-desk`
 
+[English version →](README.en.md)
+
 macOS 本地项目管理与脚本启动器。把散落在磁盘上的 HTML、Python、Node 项目集中到一个工作台里，用一个按钮在**应用内嵌终端**中真实运行它们。
 
 > 产品定位：Obsidian 式项目管理工作台 + 本地脚本启动器。不做 IDE，不做内置终端，不改动任何项目源文件。
 > 内部标识：`com.nathan.projectdesk`（Bundle ID）、`project-desk`（Cargo 包名）。
+
+---
+
+## 背景：AI 写得越多，越需要一个「台」
+
+AI 时代，让模型顺手写一段 Python 脚本、一个 HTML 页面、一个 Node 小工具，成本几乎为零。
+结果是这类项目迅速堆积：散落在磁盘各处，目录名随意，入口文件藏在子目录里，
+解释器、端口、启动命令全靠记忆，过两周再看就不知道该怎么跑，甚至不敢删。
+
+项目台就是为这批「一次性生成物」做的工作台：把它们登记成一个个项目，记下分类、标签和显示名，
+用统一的按钮在应用内嵌终端里真实运行，输出、退出码、日志都留痕。
+**不改项目源文件，不替你装依赖，也不替你决定怎么跑。**
+
+配套两件事，让 AI 生成的项目「落地即可用」：根目录的 `launcher.json`（怎么跑）
+和根目录的 `README.md`（是什么、怎么用）。见下一节。
+
+---
+
+## 与 AI 协作：项目根目录的两个约定文件
+
+这里说的「根目录」，指的是**你添加进项目台的那个项目目录**（`projects.root_path`），
+不是本仓库的根目录，也不是项目里的子目录。
+
+| 文件 | 谁写 | 项目台拿它做什么 |
+|---|---|---|
+| `launcher.json` | AI 按规范生成 / 你自己 | 读取运行方式：显示名、入口、命令与参数、工作目录、端口策略、停止策略；校验失败则回退到自动识别 |
+| `README.md`（或 `.markdown` / `.mdx` / `说明.md`） | AI / 你自己 | 在详情页「说明」Tab 渲染成 Markdown，作为这个项目的说明书 |
+
+### 1. `launcher.json` 与 AI 生成规范
+
+**[`docs/launcher-json.md`](docs/launcher-json.md)** 是给 AI 用的生成规范：
+让 AI 在产出脚本、网页或小工具时，顺手在项目根目录写一份合规的 `launcher.json`。它的作用是三件事：
+
+1. **省掉手工配置** —— 项目台添加项目时直接读取这份文件，把它作为初始运行方式，
+   不用再逐项填命令、解释器、入口和端口。
+2. **约束 AI 别乱猜** —— 规范明确要求：动态端口的 `url` 填 `null` 而不是猜 3000；
+   参数必须放 `args` 而不是拼进 `command`；相对路径不得逃出项目根目录。
+   这些正是 AI 生成配置时最容易写错、也最容易导致占用检测误判或路径被错误切分的地方。
+3. **给出可校验的边界** —— `schemaVersion`、`id` 唯一性、`defaultConfig` 引用、
+   枚举取值、路径存在性都有硬性校验；不合规就整份拒绝并回退到自动识别，不会悄悄跑错。
+
+优先级：**用户在项目台手动保存的设置 ＞ `launcher.json` ＞ 自动识别结果**。
+手动改过的配置不会被重新同步覆盖；运行状态与日志只由项目台管理，不回写这份文件。
+可直接复制的模板见 `fixtures/launcher.json`。
+
+### 2. 详情页「说明」读取的是根目录 README
+
+详情页的「说明」Tab 调用 `read_project_readme`，只读取**该项目根目录**下的说明文件，
+**不递归子目录**；文件名大小写不敏感，按以下名称查找：
+`README.md`、`README.markdown`、`README.mdx`、`说明.md`。
+
+- 内容按 Markdown 渲染（marked + DOMPurify 净化），超过 256 KB 只显示前 256 KB 并给出提示；
+- 顶部显示实际文件名，可用默认应用打开，或在 Finder 中显示；
+- 根目录没有这些文件时显示空状态，并提示当前根目录路径。
+
+所以让 AI 生成项目时顺手写一份放在**根目录**的 `README.md`，就能在项目台里直接看到说明；
+放在 `docs/`、`src/` 等子目录里是读不到的。自动识别也会把 `README.md` 当作判断依据之一，
+但只有 README 时无法推断运行方式，仍需要 `launcher.json` 或手动配置。
 
 ---
 
@@ -68,9 +128,10 @@ macOS 本地项目管理与脚本启动器。把散落在磁盘上的 HTML、Pyt
 │   └── logs/                   build.log / test.log
 │
 ├── docs/BUILD.md               构建成 App 的完整指南
-├── docs/launcher-json.md       launcher.json 配置文件生成规范
+├── docs/launcher-json.md       launcher.json 生成规范（AI 生成用）
 ├── index.html / vite.config.ts / tsconfig*.json / package.json
-└── README.md
+├── README.md                   中文说明
+└── README.en.md                English README
 ```
 
 > `index.html`、`src/`、`dist/`、`package.json`、`src-tauri/` 被工具链按固定路径查找，**不能移动**。
