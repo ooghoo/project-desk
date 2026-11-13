@@ -267,21 +267,6 @@ waits 2 seconds, then `SIGKILL`s the survivors. This avoids killing only the par
 `categories` / `projects` / `tags` / `project_tags` / `launch_configurations` / `run_history` /
 `app_settings`, migrated sequentially with `PRAGMA user_version` (currently v2); upgrades keep project records.
 
-### 8. Chinese UI
-
-- All UI text is Chinese; technical terms (Python / Node.js / HTML) keep their original names.
-- A custom menu is used (项目台 / 编辑 / 窗口 / 帮助), and `src-tauri/Info.plist` declares
-  `CFBundleDevelopmentRegion = zh-Hans` plus `CFBundleLocalizations = [zh-Hans]` so native AppKit menu
-  items (Undo / Copy / Minimise / Enter Full Screen) stay in Chinese regardless of system language.
-- The app name in the menu bar, Dock and Finder is 项目台; the Bundle ID remains `com.nathan.projectdesk`.
-
-### 9. Window capability grants
-
-With an overlay title bar (`titleBarStyle: "Overlay"`), dragging requires explicit grants:
-`capabilities/default.json` declares `core:window:allow-start-dragging` and
-`core:window:allow-toggle-maximize`. Drag regions are marked with `data-drag-window`
-(top toolbar, top 38 px of the sidebar, list header); double-clicking the title bar toggles maximise.
-
 ## 6. Known limitations
 
 - **Port conflict detection is a pre-start snapshot** — it cannot stop another process from taking the port later.
@@ -304,36 +289,3 @@ With an overlay title bar (`titleBarStyle: "Overlay"`), dragging requires explic
 - Installing dependencies and creating virtual environments are left to you in a terminal. This is an
   intentional boundary.
 
-## 7. Roadmap
-
-1. Run configuration templates (Python script / Vite / Next.js / static server) with one-click apply;
-2. Port ↔ PID mapping, enabling "stop by port";
-3. Git status, recent commits and branch display per project;
-4. Global hotkeys and menu-bar quick launch;
-5. CPU / memory sampling for running tasks;
-6. Drag-to-reorder categories, pin projects;
-7. Localisation (the UI is currently Chinese only).
-
-## 8. Test results (measured 2026-10-20)
-
-| Item | Command | Result |
-| --- | --- | --- |
-| Backend unit tests | `cargo test` | **22 passed / 0 failed** (0.13s) |
-| Frontend type check | `tsc --noEmit` | Passed, 0 errors |
-| Frontend build | `vite build` | JS 289.84 kB (gzip 83.31 kB), CSS 40.50 kB |
-| App bundling | `tauri build --bundles app` | Success, **0 warnings**, `项目台.app` 4.5 MiB |
-| Startup smoke test | Open the .app | Process alive; `project-desk.sqlite3` created automatically, `PRAGMA user_version = 2`, all 7 tables present, 4 built-in categories written |
-| Manual regression | Interaction checks | All context-menu actions work (rename / category / tags / favourite / remove), folder drop opens the confirmation page, window draggable, menu fully in Chinese |
-
-Unit test coverage:
-
-- Database: migration execution and idempotence, built-in categories, settings merge, project CRUD and tags, duplicate path detection
-- Paths: `~` expansion, `compare_key` normalisation (trailing slash / `..`), shell single-quote escaping, `is_within` prefix checks
-- Detection: static HTML, Python entry + dependency warning, npm dev script, featureless directory, directory-name prettifying
-- Run arguments: missing project directory, missing entry, paths with spaces and Chinese characters in generated scripts, port conflict detection, PID liveness
-- Status derivation: exit-code file → finished and persisted; process gone with no exit code → (after the buffer window) unknown; just started without PID → starting
-
-Verified manually rather than automated (requires GUI interaction):
-
-1. **End-to-end pass (2026-10-21)**: add `fixtures/demo-python` → click Run → the embedded terminal shows the "3…2…1" countdown and the exit-code notice; Terminal.app never opens.
-2. Dragging a folder into the window and dragging a project onto a sidebar category (implemented, not every case manually clicked through).

@@ -243,18 +243,6 @@ src-tauri/target/release/bundle/macos/项目台.app     ← Tauri 原始输出
 
 `categories` / `projects` / `tags` / `project_tags` / `launch_configurations` / `run_history` / `app_settings`，用 `PRAGMA user_version` 做顺序迁移（当前 v2），升级不会丢项目记录。
 
-### 8. 中文界面
-
-- 业务界面全部中文；技术名词（Python / Node.js / HTML）保留原名。
-- 菜单栏使用自建菜单（项目台 / 编辑 / 窗口 / 帮助），并在 `src-tauri/Info.plist` 声明 `CFBundleDevelopmentRegion = zh-Hans`、`CFBundleLocalizations = [zh-Hans]`，使 AppKit 的原生菜单项（撤销 / 拷贝 / 最小化 / 进入全屏）固定显示中文，不随系统语言变化。
-- 应用名（菜单栏、程序坞、Finder）为「项目台」，内部 Bundle ID 保持 `com.nathan.projectdesk`。
-
-### 9. 窗口能力授权
-
-自定义标题栏（`titleBarStyle: "Overlay"`）下，拖动窗口需要显式授权：`capabilities/default.json` 中声明
-`core:window:allow-start-dragging` 与 `core:window:allow-toggle-maximize`。拖动区域由 `data-drag-window` 标记
-（顶部工具栏、侧边栏顶部 38px、列表标题栏），双击标题栏缩放窗口。
-
 ## 六、已知限制
 
 - **端口占用检测是启动前快照**：无法阻止命令启动后才被其他进程抢占。
@@ -271,37 +259,4 @@ src-tauri/target/release/bundle/macos/项目台.app     ← Tauri 原始输出
 - **仅适配 macOS**，目录挑选与 Finder 集成为 macOS 实现。
 - 依赖安装、虚拟环境创建需要用户自己在终端完成——这是刻意的边界。
 
-## 七、后续可扩展
-
-1. 运行配置模板（Python 脚本 / Vite / Next.js / 静态服务）与一键套用；
-2. 端口与 PID 关联，支持「按端口停止」；
-3. 项目的 Git 状态、最近提交、分支展示；
-4. 全局快捷键与菜单栏快速启动；
-5. 运行任务的资源占用采样（CPU / 内存）；
-6. 分类拖拽排序、项目置顶；
-7. 多语言（当前为中文界面）。
-
-## 八、测试结果（2026-10-20 实测）
-
-| 项目 | 命令 | 结果 |
-|---|---|---|
-| 后端单元测试 | `cargo test` | **22 passed / 0 failed**（0.13s） |
-| 前端类型检查 | `tsc --noEmit` | 通过，0 error |
-| 前端构建 | `vite build` | 成功：JS 289.84 kB（gzip 83.31 kB）、CSS 40.50 kB |
-| 应用打包 | `tauri build --bundles app` | 成功，**0 warning**，`项目台.app` 4.5 MiB |
-| 启动冒烟 | 打开 .app | 进程存活；自动创建 `project-desk.sqlite3`，`PRAGMA user_version = 2`，7 张表齐全，4 个内置分类已写入 |
-| 人工回归（第二轮） | 交互检查 | 右键菜单全部可用（重命名/分类/标签/收藏/移除等）、拖入文件夹弹出确认页、窗口可拖动、菜单栏全中文 |
-
-覆盖的单元测试：
-
-- 数据库：迁移执行与幂等、内置分类、设置合并、项目 CRUD 与标签、重复路径检测
-- 路径：`~` 展开、`compare_key` 归一（结尾斜杠 / `..`）、shell 单引号转义、`is_within` 前缀判断
-- 识别：静态 HTML、Python 入口 + 依赖警告、npm dev 脚本、无特征目录、目录名美化
-- 运行参数：项目目录缺失、入口缺失、含空格与中文的路径脚本生成、端口占用检测、PID 存活判断
-- 状态推导：退出码文件 → 已结束并落库、进程消失且无退出码 →（超过缓冲窗口）状态未知、刚启动无 PID → 正在启动
-
-尚未自动化验证（需要 GUI 交互，已由人工确认）：
-
-1. **手动端到端验证通过（2026-10-21）**：添加 `fixtures/demo-python` → 点击「运行」→ 应用内终端直接出现「倒计时 3…2…1」与退出码提示，全程不跳出 Terminal.app。
-2. 拖拽文件夹到窗口、拖拽项目到左侧分类（代码路径已实现，未逐项人工点测）。
 
